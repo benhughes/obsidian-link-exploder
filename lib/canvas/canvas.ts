@@ -23,10 +23,17 @@ export interface canvas {
   edges: edge[];
 }
 
+export interface currentFile {
+  path: string;
+  basename: string;
+}
+
 const DEFAULT_WIDTH = 500;
 const DEFAULT_HEIGHT = 500;
 const DEFAULT_BUFFER = 100;
 
+// recursive function that calls itself to create a list of nodes and edges
+// to add to the canvas
 function createChildren(
   path: string,
   resolvedLinks: Record<string, Record<string, number>>,
@@ -36,6 +43,7 @@ function createChildren(
   rowCount: Record<string, number> = {}
 ): [node[], edge[]] {
   log.info(path, depth, num);
+  // if no links exist for this file then return
   if (!resolvedLinks[path]) {
     return [[], []];
   }
@@ -101,10 +109,6 @@ function createChildren(
 
   return [nodes, edges];
 }
-export interface currentFile {
-  path: string;
-  basename: string;
-}
 
 export async function createCanvasFromFile(
   activeFile: currentFile,
@@ -147,6 +151,9 @@ export async function createCanvasFromFile(
   return result;
 }
 
+// getFileName looks for a safe file name to use and returns it.
+// will take the path and add -n to the end until I finds one that doesn't
+// exist
 const getFileName = (
   path: string,
   doesFileExist: (path: string) => boolean
