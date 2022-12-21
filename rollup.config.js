@@ -2,12 +2,12 @@ import typescript from '@rollup/plugin-typescript';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import copy from 'rollup-plugin-copy';
-import * as dotenv from 'dotenv'
+import * as dotenv from 'dotenv';
 
-// Create a .env file to specify NOTES_PLUGIN_LOCATION 
-dotenv.config()
+// Create a .env file to specify NOTES_PLUGIN_LOCATION
+dotenv.config();
 
-const {NOTES_PLUGIN_LOCATION, BUILD} = process.env;
+const { NOTES_PLUGIN_LOCATION, BUILD } = process.env;
 const isProd = BUILD === 'production';
 
 // TODO: load this from a config

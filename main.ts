@@ -1,23 +1,13 @@
 import { Notice, Plugin, TFile } from 'obsidian';
-import {
-  DEFAULT_SETTINGS,
-  LinkExploderSettings,
-  LinkExploderSettingTab,
-} from './lib/LinkExploderSettingsTab';
 import { createCanvasFromFile } from './lib/canvas/canvas';
 import { log } from './lib/Log';
 
 export default class LinkExploderPlugin extends Plugin {
-
-  settings: LinkExploderSettings;
-
   async onload(): Promise<void> {
-    await this.loadSettings();
-
     log.setUp(this);
     log.info(`${this.manifest.name} Loaded`);
 
-   this.addCommand({
+    this.addCommand({
       id: 'link-exploder-canvas-builder',
       name: 'Create Canvas From File Links',
       checkCallback: (checking: boolean) => {
@@ -59,19 +49,9 @@ export default class LinkExploderPlugin extends Plugin {
         hotkeys: [{ key: 'r', modifiers: ['Mod', 'Shift'] }],
       });
     }
-
-    this.addSettingTab(new LinkExploderSettingTab(this.app, this));
   }
 
   onunload(): void {
     log.info('unloading link exploder');
-  }
-
-  async loadSettings(): Promise<void> {
-    this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
-  }
-
-  async saveSettings(): Promise<void> {
-    await this.saveData(this.settings);
   }
 }
