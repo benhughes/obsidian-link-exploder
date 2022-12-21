@@ -2,7 +2,7 @@
 
 🔗💣
 
-Link Exploder is a plugin that converts the current note into a [canvas](https://obsidian.md/canvas), embeding it's linked notes (and their linked notes). Useful to converting those MoCs (Map of Contents) into a visual map or visually exploring topics and how they interact with each other.
+Link Exploder is a Obsidian plugin that converts the current note into a [canvas](https://obsidian.md/canvas), embeding it's linked notes (and their linked notes). Useful to converting those MoCs (Map of Contents) into a visual map or visually exploring topics and how they interact with each other.
 
 ## Examples
 
