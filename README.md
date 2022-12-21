@@ -13,6 +13,10 @@ Link Exploder is a plugin that converts the current note into a [canvas](https:/
 
 Not avalable on the store yet, so you will need to use [obsidian42-brat](https://github.com/TfTHacker/obsidian42-brat)
 
+## Usage
+
+After installation navigate to a page you would like to create a canvas version of and then use the "Create Canvas From File Links" action from the command palette 
+
 ## Notes
 
 - this is a first release so very basic at the moment
