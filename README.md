@@ -7,6 +7,7 @@ Link Exploder is a Obsidian plugin that creates a [canvas](https://obsidian.md/c
 ## Use Cases
 - Useful for converting those MoCs (Map of Contents) into a visual map visually exploring topics and how they interact with each other.
 - Starting a canvas using items in your vault. Create a new note with a few links to topics you want to explore then call the "Create Canvas From File Links" action and you'll have a new canvas which pulls in the notes you linked as well as their linked notes too.
+- An interactive version of your local graph.
 
 ## Examples
 
