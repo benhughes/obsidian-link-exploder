@@ -34,30 +34,48 @@ const DEFAULT_BUFFER = 100;
 
 // recursive function that calls itself to create a list of nodes and edges
 // to add to the canvas
+// Some notes
+// - it only allows unique notes
+// - it priotises notes that have a lower depth overwriting notes that already exist
 function createChildren(
   path: string,
   resolvedLinks: Record<string, Record<string, number>>,
   depth: number,
+  canvasHashes: [Record<string, node>, Record<string, edge>] = [{}, {}],
   num = 0,
-  uniqueHash: Record<string, boolean> = {},
   rowCount: Record<string, number> = {}
-): [node[], edge[]] {
+): [Record<string, node>, Record<string, edge>] {
   log.info(path, depth, num);
   // if no links exist for this file then return
   if (!resolvedLinks[path]) {
-    return [[], []];
+    return canvasHashes;
   }
   if (!rowCount[num]) {
     rowCount[num] = 0;
   }
-  if (!uniqueHash[path]) {
-    uniqueHash[path] = true;
-  }
+
+  let [returnedNodes, returnedEdges] = canvasHashes;
   const fileLinks = Object.keys(resolvedLinks[path]);
 
-  let nodes: node[] = [];
-  let edges: edge[] = [];
+  // if returnedNodes is empty we can assume this is the first round and we add
+  // it to the returnedNodes hash
+  if (Object.keys(returnedNodes).length === 0) {
+    returnedNodes[path] = {
+      id: path,
+      width: DEFAULT_WIDTH,
+      height: DEFAULT_HEIGHT,
+      y:
+        (fileLinks.length * (DEFAULT_HEIGHT + DEFAULT_BUFFER)) / 2 -
+        DEFAULT_HEIGHT / 2,
+      x: 0 - DEFAULT_WIDTH * 2,
+      type: 'file',
+      file: path,
+    };
+  }
 
+  // we use this to do a comparison to make a decision about if the level
+  // of the current node is lower then the previous version of the node (if exists)
+  const currentLevelXValue = (DEFAULT_WIDTH + 500) * num;
   for (let i = 0; i < fileLinks.length; i++) {
     const link = fileLinks[i];
     log.info(
@@ -67,30 +85,29 @@ function createChildren(
       num,
       link
     );
-    if (!uniqueHash[link] && link != path) {
-      nodes = [
-        ...nodes,
-        {
-          id: link,
-          width: DEFAULT_WIDTH,
-          height: DEFAULT_HEIGHT,
-          x: (DEFAULT_WIDTH + 500) * num,
-          y: rowCount[num] * (DEFAULT_HEIGHT + DEFAULT_BUFFER),
-          type: 'file',
-          file: link,
-        },
-      ];
-      uniqueHash[link] = true;
+    // checks that node doesn't already exist and if it does it's x (using as a
+    // reresentation of level) is higher then the new node then we override it.
+    if (!returnedNodes[link] || returnedNodes[link].x > currentLevelXValue) {
+      returnedNodes[link] = {
+        id: link,
+        width: DEFAULT_WIDTH,
+        height: DEFAULT_HEIGHT,
+        x: (DEFAULT_WIDTH + 500) * num,
+        y: rowCount[num] * (DEFAULT_HEIGHT + DEFAULT_BUFFER),
+        type: 'file',
+        file: link,
+      };
+
       rowCount[num] = rowCount[num] + 1;
     }
-
-    edges.push({
-      id: `${path}-${link}`,
+    const edgeId = `${path}-${link}`;
+    returnedEdges[edgeId] = {
+      id: edgeId,
       fromSide: 'right',
       toSide: 'left',
       fromNode: path,
       toNode: link,
-    });
+    };
 
     if (num < depth) {
       const nextDepth = num + 1;
@@ -98,16 +115,16 @@ function createChildren(
         link,
         resolvedLinks,
         depth,
+        [returnedNodes, returnedEdges],
         nextDepth,
-        uniqueHash,
         rowCount
       );
-      nodes = [...nodes, ...childNodes];
-      edges = [...edges, ...childEdges];
+      returnedNodes = { ...returnedNodes, ...childNodes };
+      returnedEdges = { ...returnedEdges, ...childEdges };
     }
   }
 
-  return [nodes, edges];
+  return [returnedNodes, returnedEdges];
 }
 
 export async function createCanvasFromFile(
@@ -121,29 +138,16 @@ export async function createCanvasFromFile(
   if (!resolvedLinks[filePath]) {
     throw Error(`Current file ${fileName} has no links`);
   }
-  const fileLinks = Object.keys(resolvedLinks[filePath]);
 
-  let nodes: node[] = [
-    {
-      id: filePath,
-      width: DEFAULT_WIDTH,
-      height: DEFAULT_HEIGHT,
-      y:
-        (fileLinks.length * (DEFAULT_HEIGHT + DEFAULT_BUFFER)) / 2 -
-        DEFAULT_HEIGHT / 2,
-      x: 0 - DEFAULT_WIDTH * 2,
-      type: 'file',
-      file: filePath,
-    },
-  ];
-  let edges: edge[] = [];
   const [childNodes, childEdges] = createChildren(filePath, resolvedLinks, 1);
 
-  nodes = [...nodes, ...childNodes];
-  edges = [...edges, ...childEdges];
+  const nodes = Object.values(childNodes);
+  const edges = Object.values(childEdges);
 
   const canvas: canvas = { nodes, edges };
+
   log.info(canvas);
+
   const path = getFileName(`${fileName}-canvas.canvas`, doesFileExist);
   const result = await createFile(path, JSON.stringify(canvas, null, 2));
   openFile(result);

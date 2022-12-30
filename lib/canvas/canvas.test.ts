@@ -113,6 +113,44 @@ describe('createCanvasFromFile', () => {
         },
       ],
     },
+    {
+      name: 'prioritises nodes in a lower depth',
+      topPath: 'file-number-1',
+      resolvedLinks: {
+        'file-number-1': {
+          'file-number-2': 1,
+          'file-number-3': 1,
+        },
+        'file-number-2': {
+          'file-number-3': 1,
+        },
+        'file-number-3': { 'file-number-4': 1 },
+      },
+      expectedNodes: [
+        { id: 'file-number-1' },
+        { id: 'file-number-2' },
+        { id: 'file-number-3', x: 0 },
+        { id: 'file-number-4' },
+      ],
+      expectedEdges: [
+        {
+          fromNode: 'file-number-1',
+          toNode: 'file-number-2',
+        },
+        {
+          fromNode: 'file-number-2',
+          toNode: 'file-number-3',
+        },
+        {
+          fromNode: 'file-number-1',
+          toNode: 'file-number-3',
+        },
+        {
+          fromNode: 'file-number-3',
+          toNode: 'file-number-4',
+        },
+      ],
+    },
   ];
   testCases.forEach((tc) => {
     test(tc.name, async () => {
