@@ -45,14 +45,16 @@ function createChildren(
   depth: number,
   direction: 'incoming' | 'outgoing' = 'outgoing',
   canvasHashes: [Record<string, node>, Record<string, edge>] = [{}, {}],
-  num = 0,
+  // the column the path is in
+  colNumber = 0,
+  // used to keep track of how many items are in each column 
   colCount: Record<string, number> = {}
 ): [Record<string, node>, Record<string, edge>] {
-  log.info(path, depth, num);
+  log.info(path, depth, colNumber);
   const isOutgoing = direction === 'outgoing';
 
-  if (!colCount[num]) {
-    colCount[num] = 0;
+  if (!colCount[colNumber]) {
+    colCount[colNumber] = 0;
   }
 
   let [returnedNodes, returnedEdges] = canvasHashes;
@@ -66,9 +68,7 @@ function createChildren(
       id: path,
       width: DEFAULT_WIDTH,
       height: DEFAULT_HEIGHT,
-      y:
-        (fileLinks.length * (DEFAULT_HEIGHT + DEFAULT_BUFFER)) / 2 -
-        DEFAULT_HEIGHT / 2,
+      y: 0,
       x: 0,
       type: 'file',
       file: path,
@@ -79,14 +79,14 @@ function createChildren(
 
   // we use this to do a comparison to make a decision about if the level
   // of the current node is lower then the previous version of the node (if exists)
-  const currentLevelXValue = (DEFAULT_WIDTH + 500) * (num + 1);
+  const currentLevelXValue = (DEFAULT_WIDTH + 500) * (colNumber + 1);
   for (let i = 0; i < fileLinks.length; i++) {
     const link = fileLinks[i];
     log.info(
-      Array.from(new Array(num))
+      Array.from(new Array(colNumber))
         .map(() => '--')
         .join(''),
-      num,
+      colNumber,
       link
     );
 
@@ -101,24 +101,24 @@ function createChildren(
 
     // checks that node doesn't already exist and if it does it's x (using as a
     // reresentation of level) is higher then the new node then we override it.
+    // we want to prioritise notes closer to the source
     if (!returnedNodes[link] || returnedNodes[link].x > currentLevelXValue) {
       returnedNodes[link] = {
         id: link,
         width: DEFAULT_WIDTH,
         height: DEFAULT_HEIGHT,
         x: isOutgoing ? currentLevelXValue : 0 - currentLevelXValue,
-        y: colCount[num] * (DEFAULT_HEIGHT + DEFAULT_BUFFER),
+        y: colCount[colNumber] * (DEFAULT_HEIGHT + DEFAULT_BUFFER),
         type: 'file',
         file: link,
       };
 
-      colCount[num] = colCount[num] + 1;
+      colCount[colNumber] = colCount[colNumber] + 1;
     }
 
-    if (num < depth) {
-      // TODO: is it worth returning the children (but still passing in what we have so far) this might make it a bit cleaner when checking child nodes for working out locations...
+    if (colNumber < depth) {
       const prevNodeCount = Object.keys(returnedNodes).length;
-      const nextDepth = num + 1;
+      const nextDepth = colNumber + 1;
       // before children get added we need to save the start point for this node so we can
       // easily set how its postioned amongst it's children
       const nodeYStartingPosition =
