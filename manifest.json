@@ -1,7 +1,7 @@
 {
   "id": "obsidian-link-exploder",
   "name": "Link Exploder",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "minAppVersion": "1.1.0",
   "description": "This is a sample plugin for Obsidian. This plugin demonstrates some of the capabilities of the Obsidian API.",
   "author": "Obsidian",

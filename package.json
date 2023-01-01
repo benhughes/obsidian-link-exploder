@@ -1,6 +1,6 @@
 {
   "name": "obsidian-link-exploder",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "main": "main.js",
   "scripts": {
     "dev": "rollup --config rollup.config.js -w",
@@ -29,10 +29,7 @@
     "rollup-plugin-copy": "^3.4.0",
     "ts-jest": "^29.0.3",
     "tslib": "^2.2.0",
-    "typescript": "^4.9.4"
-  },
-  "dependencies": {
-    "dotenv": "^16.0.3",
-    "obsidian-dataview": "git+https://github.com/blacksmithgu/obsidian-dataview.git#0.4.4"
+    "typescript": "^4.9.4",
+    "dotenv": "^16.0.3"
   }
 }
