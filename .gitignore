@@ -10,5 +10,5 @@ package-lock.json
 
 .env
 
-# obsidian
-data.json
+# release
+release
