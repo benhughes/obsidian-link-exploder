@@ -10,9 +10,6 @@ import {
 describe('createCanvasFromFile', () => {
   const doesFileExist = (_: string) => false;
   const openFile = (_: currentFile) => ({});
-  const createFileMock = jest.fn((path: string, _: string) =>
-    Promise.resolve({ path: path, basename: '' })
-  );
 
   const testNodes = (nodes: Partial<node>[], resultNodes: node[]) => {
     expect(resultNodes.length).toBe(nodes.length);
