@@ -31,18 +31,6 @@ describe('createCanvasFromFile', () => {
     });
   };
 
-  test('errors if top file has no links', async () => {
-    await expect(
-      createCanvasFromFile(
-        { path: 'my-path', basename: 'bob' },
-        { '': { '': 1 } },
-        doesFileExist,
-        createFileMock,
-        openFile
-      )
-    ).rejects.toThrow('Current file bob has no links');
-  });
-
   interface testCases {
     name: string;
     topPath: string;
@@ -53,14 +41,21 @@ describe('createCanvasFromFile', () => {
 
   const testCases: testCases[] = [
     {
-      name: 'handles a single link',
-      topPath: 'my-path/file',
-      resolvedLinks: { ['my-path/file']: { 'some-other-file': 1 } },
-      expectedNodes: [{ id: 'my-path/file' }, { id: 'some-other-file' }],
-      expectedEdges: [{ fromNode: 'my-path/file', toNode: 'some-other-file' }],
+      name: 'returns single node if path has no links',
+      topPath: 'A',
+      resolvedLinks: {},
+      expectedNodes: [{ id: 'A' }],
+      expectedEdges: [],
     },
     {
-      name: 'skips duplicates',
+      name: 'handles a single link',
+      topPath: 'A',
+      resolvedLinks: { ['A']: { B: 1 } },
+      expectedNodes: [{ id: 'A' }, { id: 'B' }],
+      expectedEdges: [{ fromNode: 'A', toNode: 'B' }],
+    },
+    {
+      name: 'skips duplicates but still adds the edges',
       topPath: 'my-path/file',
       resolvedLinks: {
         'my-path/file': {
@@ -87,33 +82,6 @@ describe('createCanvasFromFile', () => {
       ],
     },
     {
-      name: 'skips duplicates of top file',
-      topPath: 'my-path/file',
-      resolvedLinks: {
-        'my-path/file': {
-          'some-other-file': 1,
-          'some-other-file-that-points-to-dupe': 1,
-        },
-        'some-other-file-that-points-to-dupe': { 'my-path/file': 1 },
-      },
-      expectedNodes: [
-        { id: 'my-path/file' },
-        { id: 'some-other-file' },
-        { id: 'some-other-file-that-points-to-dupe' },
-      ],
-      expectedEdges: [
-        { fromNode: 'my-path/file', toNode: 'some-other-file' },
-        {
-          fromNode: 'my-path/file',
-          toNode: 'some-other-file-that-points-to-dupe',
-        },
-        {
-          fromNode: 'some-other-file-that-points-to-dupe',
-          toNode: 'my-path/file',
-        },
-      ],
-    },
-    {
       name: 'prioritises nodes in a lower depth',
       topPath: 'file-number-1',
       resolvedLinks: {
@@ -129,7 +97,7 @@ describe('createCanvasFromFile', () => {
       expectedNodes: [
         { id: 'file-number-1' },
         { id: 'file-number-2' },
-        { id: 'file-number-3', x: 0 },
+        { id: 'file-number-3', x: 1000 },
         { id: 'file-number-4' },
       ],
       expectedEdges: [
@@ -149,6 +117,30 @@ describe('createCanvasFromFile', () => {
           fromNode: 'file-number-3',
           toNode: 'file-number-4',
         },
+      ],
+    },
+    {
+      name: 'handles a incoming link',
+      topPath: 'file-number-2',
+      resolvedLinks: { 'file-number-1': { 'file-number-2': 1 } },
+      expectedNodes: [{ id: 'file-number-2' }, { id: 'file-number-1' }],
+      expectedEdges: [{ fromNode: 'file-number-1', toNode: 'file-number-2' }],
+    },
+    {
+      name: 'handles incoming and outgoing links',
+      topPath: 'file-number-2',
+      resolvedLinks: {
+        'file-number-1': { 'file-number-2': 1 },
+        'file-number-2': { 'file-number-3': 1 },
+      },
+      expectedNodes: [
+        { id: 'file-number-2' },
+        { id: 'file-number-3' },
+        { id: 'file-number-1' },
+      ],
+      expectedEdges: [
+        { fromNode: 'file-number-2', toNode: 'file-number-3' },
+        { fromNode: 'file-number-1', toNode: 'file-number-2' },
       ],
     },
   ];
