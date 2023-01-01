@@ -28,8 +28,9 @@ export default class LinkExploderPlugin extends Plugin {
             doesFileExist,
             createFile,
             openFile
-          ).catch(() => {
-            new Notice('Something went wrong with creating the canvas');
+          ).catch((e) => {
+            new Notice(`Something went wrong with creating the canvas: ${e}`);
+            console.error(e);
           });
         }
       },
