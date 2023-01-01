@@ -29,9 +29,9 @@ export interface currentFile {
   basename: string;
 }
 
-const DEFAULT_WIDTH = 500;
-const DEFAULT_HEIGHT = 500;
-const DEFAULT_BUFFER = 100;
+export const DEFAULT_WIDTH = 500;
+export const DEFAULT_HEIGHT = 500;
+export const DEFAULT_BUFFER = 100;
 
 // recursive function that calls itself to create a list of nodes and edges
 // to add to the canvas
@@ -46,13 +46,13 @@ function createChildren(
   direction: 'incoming' | 'outgoing' = 'outgoing',
   canvasHashes: [Record<string, node>, Record<string, edge>] = [{}, {}],
   num = 0,
-  rowCount: Record<string, number> = {}
+  colCount: Record<string, number> = {}
 ): [Record<string, node>, Record<string, edge>] {
   log.info(path, depth, num);
   const isOutgoing = direction === 'outgoing';
 
-  if (!rowCount[num]) {
-    rowCount[num] = 0;
+  if (!colCount[num]) {
+    colCount[num] = 0;
   }
 
   let [returnedNodes, returnedEdges] = canvasHashes;
@@ -60,6 +60,7 @@ function createChildren(
 
   // if returnedNodes is empty we can assume this is the first round and we add
   // it to the returnedNodes hash
+  let topLevelAdded = false;
   if (Object.keys(returnedNodes).length === 0) {
     returnedNodes[path] = {
       id: path,
@@ -73,6 +74,7 @@ function createChildren(
       file: path,
       color: '1',
     };
+    topLevelAdded = true;
   }
 
   // we use this to do a comparison to make a decision about if the level
@@ -88,22 +90,6 @@ function createChildren(
       link
     );
 
-    // checks that node doesn't already exist and if it does it's x (using as a
-    // reresentation of level) is higher then the new node then we override it.
-    if (!returnedNodes[link] || returnedNodes[link].x > currentLevelXValue) {
-      returnedNodes[link] = {
-        id: link,
-        width: DEFAULT_WIDTH,
-        height: DEFAULT_HEIGHT,
-        x: isOutgoing ? currentLevelXValue : 0 - currentLevelXValue,
-        y: rowCount[num] * (DEFAULT_HEIGHT + DEFAULT_BUFFER),
-        type: 'file',
-        file: link,
-      };
-
-      rowCount[num] = rowCount[num] + 1;
-    }
-
     const edgeId = `${path}-${link}`;
     returnedEdges[edgeId] = {
       id: edgeId,
@@ -113,8 +99,31 @@ function createChildren(
       toNode: isOutgoing ? link : path,
     };
 
+    // checks that node doesn't already exist and if it does it's x (using as a
+    // reresentation of level) is higher then the new node then we override it.
+    if (!returnedNodes[link] || returnedNodes[link].x > currentLevelXValue) {
+      returnedNodes[link] = {
+        id: link,
+        width: DEFAULT_WIDTH,
+        height: DEFAULT_HEIGHT,
+        x: isOutgoing ? currentLevelXValue : 0 - currentLevelXValue,
+        y: colCount[num] * (DEFAULT_HEIGHT + DEFAULT_BUFFER),
+        type: 'file',
+        file: link,
+      };
+
+      colCount[num] = colCount[num] + 1;
+    }
+
     if (num < depth) {
+      // TODO: is it worth returning the children (but still passing in what we have so far) this might make it a bit cleaner when checking child nodes for working out locations...
+      const prevNodeCount = Object.keys(returnedNodes).length;
       const nextDepth = num + 1;
+      // before children get added we need to save the start point for this node so we can
+      // easily set how its postioned amongst it's children
+      const nodeYStartingPosition =
+        (colCount[nextDepth] || 0) * (DEFAULT_HEIGHT + DEFAULT_BUFFER);
+
       const [childNodes, childEdges] = createChildren(
         link,
         resolvedLinks,
@@ -122,15 +131,47 @@ function createChildren(
         direction,
         [returnedNodes, returnedEdges],
         nextDepth,
-        rowCount
+        colCount
       );
+
+      const newChildrenAdded = Object.keys(childNodes).length - prevNodeCount;
+
+      if (newChildrenAdded > 0) {
+        childNodes[link].y =
+          nodeYStartingPosition +
+          calculateYPositionFromNumberOfChildren(newChildrenAdded);
+      } else {
+        // if it has no children we add a count to the next col to give it a buffer so the
+        // next sibblings children doesn't take up the space
+        childNodes[link].y =
+          colCount[nextDepth] * (DEFAULT_HEIGHT + DEFAULT_BUFFER);
+        colCount[nextDepth] = colCount[nextDepth] + 1;
+      }
+
       returnedNodes = { ...returnedNodes, ...childNodes };
       returnedEdges = { ...returnedEdges, ...childEdges };
     }
   }
 
+  // as we added the top level node earlier we now have to position it right we get the length of
+  // of the children in the highest col
+  if (topLevelAdded) {
+    for (let i = depth; i >= 0; i--) {
+      const maxRowCount = colCount[i];
+      if (maxRowCount) {
+        returnedNodes[path].y =
+          calculateYPositionFromNumberOfChildren(maxRowCount);
+        break;
+      }
+    }
+  }
+
   return [returnedNodes, returnedEdges];
 }
+
+const calculateYPositionFromNumberOfChildren = (childrenCount: number) =>
+  (DEFAULT_HEIGHT * childrenCount + DEFAULT_BUFFER * (childrenCount - 1)) / 2 -
+  DEFAULT_HEIGHT / 2;
 
 export async function createCanvasFromFile(
   activeFile: currentFile,
