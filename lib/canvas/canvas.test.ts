@@ -253,17 +253,18 @@ describe('createCanvasFromFile', () => {
       topPath: 'file-A',
       resolvedLinks: {
         'file-A': { 'file-B': 1, 'file-C': 1, 'file-D': 1 },
-        'file-B': { 'file-E': 1},
+        'file-B': { 'file-E': 1 },
         'file-C': {},
       },
       expectedNodes: [
-        {id: 'file-A',
+        {
+          id: 'file-A',
           y: (DEFAULT_HEIGHT * 3 + DEFAULT_BUFFER * 2) / 2 - DEFAULT_HEIGHT / 2,
         },
-        {id: 'file-B', y: 0},
-        {id: 'file-E', y: 0},
-        {id: 'file-C', y: DEFAULT_HEIGHT + DEFAULT_BUFFER},
-        {id: 'file-D', y: (DEFAULT_HEIGHT + DEFAULT_BUFFER) * 2},
+        { id: 'file-B', y: 0 },
+        { id: 'file-E', y: 0 },
+        { id: 'file-C', y: DEFAULT_HEIGHT + DEFAULT_BUFFER },
+        { id: 'file-D', y: (DEFAULT_HEIGHT + DEFAULT_BUFFER) * 2 },
       ],
       expectedEdges: [
         { fromNode: 'file-A', toNode: 'file-B' },
@@ -274,11 +275,34 @@ describe('createCanvasFromFile', () => {
     },
     {
       name: 'correctly places backlinks',
-      skip: true,
-      topPath: '',
-      resolvedLinks: {},
-      expectedEdges: [],
-      expectedNodes: [],
+      topPath: 'file-A',
+      resolvedLinks: {
+        'file-A': { 'file-B': 1, 'file-C': 1 },
+        'file-D': { 'file-A': 1 },
+        'file-E': { 'file-A': 1 },
+      },
+      expectedNodes: [
+        {
+          id: 'file-A',
+          y: (DEFAULT_HEIGHT * 2 + DEFAULT_BUFFER * 1) / 2 - DEFAULT_HEIGHT / 2,
+        },
+        { id: 'file-B', y: 0 },
+        { id: 'file-C', y: DEFAULT_HEIGHT + DEFAULT_BUFFER },
+        {
+          id: 'file-D',
+          y: 0,
+        },
+        {
+          id: 'file-E',
+          y: DEFAULT_HEIGHT + DEFAULT_BUFFER,
+        },
+      ],
+      expectedEdges: [
+        { fromNode: 'file-A', toNode: 'file-B' },
+        { fromNode: 'file-A', toNode: 'file-C' },
+        { fromNode: 'file-D', toNode: 'file-A' },
+        { fromNode: 'file-E', toNode: 'file-A' },
+      ],
     },
     {
       name: 'handles depth of 4',

@@ -38,20 +38,17 @@ export const DEFAULT_BUFFER = 100;
 // Some notes
 // - it only allows unique notes
 // - it priotises notes that have a lower depth overwriting notes that already exist
-// - Supports incoming and outgoing links
 function createChildren(
   path: string,
   resolvedLinks: Record<string, Record<string, number>>,
   depth: number,
-  direction: 'incoming' | 'outgoing' = 'outgoing',
   canvasHashes: [Record<string, node>, Record<string, edge>] = [{}, {}],
   // the column the path is in
   colNumber = 0,
-  // used to keep track of how many items are in each column 
+  // used to keep track of how many items are in each column
   colCount: Record<string, number> = {}
 ): [Record<string, node>, Record<string, edge>] {
   log.info(path, depth, colNumber);
-  const isOutgoing = direction === 'outgoing';
 
   if (!colCount[colNumber]) {
     colCount[colNumber] = 0;
@@ -95,8 +92,8 @@ function createChildren(
       id: edgeId,
       fromSide: 'right',
       toSide: 'left',
-      fromNode: isOutgoing ? path : link,
-      toNode: isOutgoing ? link : path,
+      fromNode: path,
+      toNode: link,
     };
 
     // checks that node doesn't already exist and if it does it's x (using as a
@@ -107,7 +104,7 @@ function createChildren(
         id: link,
         width: DEFAULT_WIDTH,
         height: DEFAULT_HEIGHT,
-        x: isOutgoing ? currentLevelXValue : 0 - currentLevelXValue,
+        x: currentLevelXValue,
         y: colCount[colNumber] * (DEFAULT_HEIGHT + DEFAULT_BUFFER),
         type: 'file',
         file: link,
@@ -128,7 +125,6 @@ function createChildren(
         link,
         resolvedLinks,
         depth,
-        direction,
         [returnedNodes, returnedEdges],
         nextDepth,
         colCount
@@ -169,6 +165,54 @@ function createChildren(
   return [returnedNodes, returnedEdges];
 }
 
+// TODO use this to improve orign function
+function createIncomingChildren(
+  path: string,
+  resolvedLinks: Record<string, Record<string, number>>,
+  canvasHashes: [Record<string, node>, Record<string, edge>] = [{}, {}]
+): [Record<string, node>, Record<string, edge>] {
+  const [returnedNodes, returnedEdges] = canvasHashes;
+  if (!returnedNodes[path]) {
+    log.warn('createIncomingChildren: path not in canvasHashes');
+    return canvasHashes;
+  }
+
+  const fileLinks = Object.keys(resolvedLinks[path] || {}).filter(
+    (link) => !returnedNodes[link]
+  );
+
+  const baseY = returnedNodes[path].y;
+  const yStart =
+    baseY +
+    DEFAULT_HEIGHT / 2 -
+    ((fileLinks.length / 2) * DEFAULT_HEIGHT +
+      ((fileLinks.length - 1) / 2) * DEFAULT_BUFFER);
+  for (let i = 0; i < fileLinks.length; i++) {
+    const link = fileLinks[i];
+
+    const edgeId = `${path}-${link}`;
+    returnedEdges[edgeId] = {
+      id: edgeId,
+      fromSide: 'right',
+      toSide: 'left',
+      fromNode: link,
+      toNode: path,
+    };
+
+    returnedNodes[link] = {
+      id: link,
+      width: DEFAULT_WIDTH,
+      height: DEFAULT_HEIGHT,
+      x: 0 - (DEFAULT_WIDTH + 500),
+      y: yStart + i * (DEFAULT_HEIGHT + DEFAULT_BUFFER),
+      type: 'file',
+      file: link,
+    };
+  }
+
+  return [returnedNodes, returnedEdges];
+}
+
 const calculateYPositionFromNumberOfChildren = (childrenCount: number) =>
   (DEFAULT_HEIGHT * childrenCount + DEFAULT_BUFFER * (childrenCount - 1)) / 2 -
   DEFAULT_HEIGHT / 2;
@@ -191,11 +235,9 @@ export async function createCanvasFromFile(
     resolvedLinks,
     1
   );
-  const [incomingNodes, incomingEdges] = createChildren(
+  const [incomingNodes, incomingEdges] = createIncomingChildren(
     filePath,
     resolvedIncomingLinks,
-    0,
-    'incoming',
     [outgoingNodes, outgoingEdges]
   );
 
