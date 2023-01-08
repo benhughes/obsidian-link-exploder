@@ -5,6 +5,8 @@ import {
   currentFile,
   edge,
   node,
+  DEFAULT_BUFFER,
+  DEFAULT_HEIGHT,
 } from './canvas';
 
 describe('createCanvasFromFile', () => {
@@ -34,6 +36,7 @@ describe('createCanvasFromFile', () => {
     resolvedLinks: Record<string, Record<string, number>>;
     expectedNodes: Partial<node>[];
     expectedEdges: Partial<edge>[];
+    skip?: boolean;
   }
 
   const testCases: testCases[] = [
@@ -140,9 +143,183 @@ describe('createCanvasFromFile', () => {
         { fromNode: 'file-number-1', toNode: 'file-number-2' },
       ],
     },
+    // Positioning Tests
+
+    {
+      name: 'correctly spaces out 2 levels of nodes',
+      topPath: 'file-A',
+      resolvedLinks: {
+        'file-A': { 'file-B': 1, 'file-C': 1 },
+      },
+      expectedNodes: [
+        {
+          id: 'file-A',
+          y: (DEFAULT_HEIGHT * 2 + DEFAULT_BUFFER * 1) / 2 - DEFAULT_HEIGHT / 2,
+        },
+        { id: 'file-B', y: 0 },
+        { id: 'file-C', y: DEFAULT_HEIGHT + DEFAULT_BUFFER },
+      ],
+      expectedEdges: [
+        { fromNode: 'file-A', toNode: 'file-B' },
+        { fromNode: 'file-A', toNode: 'file-C' },
+      ],
+    },
+    {
+      name: 'correctly spaces out three levels of nodes',
+      topPath: 'file-A',
+      resolvedLinks: {
+        'file-A': { 'file-B': 1, 'file-C': 1 },
+        'file-B': { 'file-D': 1, 'file-E': 1, 'file-F': 1 },
+        'file-C': { 'file-G': 1, 'file-H': 1 },
+      },
+      expectedNodes: [
+        {
+          id: 'file-A',
+          y: (DEFAULT_HEIGHT * 5 + DEFAULT_BUFFER * 4) / 2 - DEFAULT_HEIGHT / 2,
+        },
+        {
+          id: 'file-B',
+          y: (DEFAULT_HEIGHT * 3 + DEFAULT_BUFFER * 2) / 2 - DEFAULT_HEIGHT / 2,
+        },
+        { id: 'file-D', y: 0 },
+        { id: 'file-E', y: DEFAULT_HEIGHT + DEFAULT_BUFFER },
+        { id: 'file-F', y: (DEFAULT_HEIGHT + DEFAULT_BUFFER) * 2 },
+        {
+          id: 'file-C',
+          y:
+            (DEFAULT_HEIGHT + DEFAULT_BUFFER) * 3 +
+            (DEFAULT_HEIGHT + DEFAULT_BUFFER) / 2,
+        },
+        { id: 'file-G', y: (DEFAULT_HEIGHT + DEFAULT_BUFFER) * 3 },
+        { id: 'file-H', y: (DEFAULT_HEIGHT + DEFAULT_BUFFER) * 4 },
+      ],
+      expectedEdges: [
+        { fromNode: 'file-A', toNode: 'file-B' },
+        { fromNode: 'file-B', toNode: 'file-D' },
+        { fromNode: 'file-B', toNode: 'file-E' },
+        { fromNode: 'file-B', toNode: 'file-F' },
+        { fromNode: 'file-A', toNode: 'file-C' },
+        { fromNode: 'file-C', toNode: 'file-G' },
+        { fromNode: 'file-C', toNode: 'file-H' },
+      ],
+    },
+    {
+      name: 'correctly spaces out three vaired children levels of nodes',
+      topPath: 'file-A',
+      resolvedLinks: {
+        'file-A': { 'file-B': 1, 'file-C': 1, 'file-I': 1 },
+        'file-B': { 'file-D': 1, 'file-E': 1, 'file-F': 1 },
+        'file-C': {},
+        'file-I': { 'file-G': 1, 'file-H': 1 },
+      },
+      expectedNodes: [
+        {
+          id: 'file-A',
+          y: (DEFAULT_HEIGHT * 6 + DEFAULT_BUFFER * 5) / 2 - DEFAULT_HEIGHT / 2,
+        },
+        {
+          id: 'file-B',
+          y: (DEFAULT_HEIGHT * 3 + DEFAULT_BUFFER * 2) / 2 - DEFAULT_HEIGHT / 2,
+        },
+        { id: 'file-D', y: 0 },
+        { id: 'file-E', y: DEFAULT_HEIGHT + DEFAULT_BUFFER },
+        { id: 'file-F', y: (DEFAULT_HEIGHT + DEFAULT_BUFFER) * 2 },
+        {
+          id: 'file-C',
+          y: (DEFAULT_HEIGHT + DEFAULT_BUFFER) * 3,
+        },
+        {
+          id: 'file-I',
+          y:
+            (DEFAULT_HEIGHT + DEFAULT_BUFFER) * 4 +
+            (DEFAULT_HEIGHT + DEFAULT_BUFFER) / 2,
+        },
+        { id: 'file-G', y: (DEFAULT_HEIGHT + DEFAULT_BUFFER) * 4 },
+        { id: 'file-H', y: (DEFAULT_HEIGHT + DEFAULT_BUFFER) * 5 },
+      ],
+      expectedEdges: [
+        { fromNode: 'file-A', toNode: 'file-B' },
+        { fromNode: 'file-B', toNode: 'file-D' },
+        { fromNode: 'file-B', toNode: 'file-E' },
+        { fromNode: 'file-B', toNode: 'file-F' },
+        { fromNode: 'file-A', toNode: 'file-C' },
+        { fromNode: 'file-A', toNode: 'file-I' },
+        { fromNode: 'file-I', toNode: 'file-G' },
+        { fromNode: 'file-I', toNode: 'file-H' },
+      ],
+    },
+    {
+      name: 'correctly places top file when mid col is bigger then child cols',
+      topPath: 'file-A',
+      resolvedLinks: {
+        'file-A': { 'file-B': 1, 'file-C': 1, 'file-D': 1 },
+        'file-B': { 'file-E': 1 },
+        'file-C': {},
+      },
+      expectedNodes: [
+        {
+          id: 'file-A',
+          y: (DEFAULT_HEIGHT * 3 + DEFAULT_BUFFER * 2) / 2 - DEFAULT_HEIGHT / 2,
+        },
+        { id: 'file-B', y: 0 },
+        { id: 'file-E', y: 0 },
+        { id: 'file-C', y: DEFAULT_HEIGHT + DEFAULT_BUFFER },
+        { id: 'file-D', y: (DEFAULT_HEIGHT + DEFAULT_BUFFER) * 2 },
+      ],
+      expectedEdges: [
+        { fromNode: 'file-A', toNode: 'file-B' },
+        { fromNode: 'file-B', toNode: 'file-E' },
+        { fromNode: 'file-A', toNode: 'file-C' },
+        { fromNode: 'file-A', toNode: 'file-D' },
+      ],
+    },
+    {
+      name: 'correctly places backlinks',
+      topPath: 'file-A',
+      resolvedLinks: {
+        'file-A': { 'file-B': 1, 'file-C': 1 },
+        'file-D': { 'file-A': 1 },
+        'file-E': { 'file-A': 1 },
+      },
+      expectedNodes: [
+        {
+          id: 'file-A',
+          y: (DEFAULT_HEIGHT * 2 + DEFAULT_BUFFER * 1) / 2 - DEFAULT_HEIGHT / 2,
+        },
+        { id: 'file-B', y: 0 },
+        { id: 'file-C', y: DEFAULT_HEIGHT + DEFAULT_BUFFER },
+        {
+          id: 'file-D',
+          y: 0,
+        },
+        {
+          id: 'file-E',
+          y: DEFAULT_HEIGHT + DEFAULT_BUFFER,
+        },
+      ],
+      expectedEdges: [
+        { fromNode: 'file-A', toNode: 'file-B' },
+        { fromNode: 'file-A', toNode: 'file-C' },
+        { fromNode: 'file-D', toNode: 'file-A' },
+        { fromNode: 'file-E', toNode: 'file-A' },
+      ],
+    },
+    {
+      name: 'handles depth of 4',
+      skip: true,
+      topPath: '',
+      resolvedLinks: {},
+      expectedEdges: [],
+      expectedNodes: [],
+    },
   ];
+
   testCases.forEach((tc) => {
-    test(tc.name, async () => {
+    let testRunner: typeof test | typeof test.skip = test;
+    if (tc.skip) {
+      testRunner = test.skip;
+    }
+    testRunner(tc.name, async () => {
       const createFileMock = jest.fn((path: string, _: string) =>
         Promise.resolve({ path: path, basename: '' })
       );

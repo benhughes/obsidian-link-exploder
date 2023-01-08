@@ -36,6 +36,7 @@ export default class LinkExploderPlugin extends Plugin {
       },
     });
 
+    // this only appears if in dev mode, allows quick reloading with shift-cmd-R
     if (this.manifest.name.contains('Canary')) {
       this.addCommand({
         id: 'reloadLinkExploder',
