@@ -1,6 +1,6 @@
 {
   "name": "obsidian-link-exploder",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "main": "main.js",
   "scripts": {
     "dev": "rollup --config rollup.config.js -w",
