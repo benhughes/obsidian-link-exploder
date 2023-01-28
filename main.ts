@@ -17,7 +17,7 @@ export default class LinkExploderPlugin extends Plugin {
         const activeFile: TFile | null = this.app.workspace.getActiveFile();
         if (activeFile) {
           const doesFileExist = (path: string) =>
-            Boolean(this.app.metadataCache.getCache(path));
+            Boolean(this.app.vault.getAbstractFileByPath(path));
           const createFile = (path: string, data: string) =>
             this.app.vault.create(path, data);
           const openFile = (currentFile: TFile) =>

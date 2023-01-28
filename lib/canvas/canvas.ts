@@ -248,7 +248,11 @@ export async function createCanvasFromFile(
 
   log.info(canvas);
 
-  const path = getFileName(`${fileName}-canvas.canvas`, doesFileExist);
+  const path = getFileName(`${fileName}.canvas`, doesFileExist);
+  if (!path) {
+    throw `unable to save: ${fileName}`;
+  }
+
   const result = await createFile(path, JSON.stringify(canvas, null, 2));
   openFile(result);
   log.info(result);
@@ -281,7 +285,7 @@ const buildResolvedIncomingLinks = (
 const getFileName = (
   path: string,
   doesFileExist: (path: string) => boolean
-) => {
+) : string | null => {
   if (!doesFileExist(path)) {
     return path;
   }
@@ -294,5 +298,5 @@ const getFileName = (
       return newPath;
     }
   }
-  log.warn(`no paths avialable for ${path}`);
+  return null;
 };
