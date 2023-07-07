@@ -19,7 +19,7 @@ Link Exploder is a Obsidian plugin that creates a [canvas](https://obsidian.md/c
 
 ## Install
 
-Not available on the store yet ([awaiting approval](https://github.com/obsidianmd/obsidian-releases/pull/1493)), so you will need to use [obsidian42-brat](https://github.com/TfTHacker/obsidian42-brat)
+Now avalible on the plugin marketplace! Get it [here](https://obsidian.md/plugins?id=link-exploder)
 
 ## Usage
 
