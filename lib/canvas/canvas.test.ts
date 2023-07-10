@@ -329,7 +329,8 @@ describe('createCanvasFromFile', () => {
         tc.resolvedLinks,
         doesFileExist,
         createFileMock,
-        openFile
+        openFile,
+        ''
       );
       const createdCanvas: canvas = JSON.parse(createFileMock.mock.calls[0][1]);
       testNodes(tc.expectedNodes, createdCanvas.nodes);
