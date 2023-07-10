@@ -39,7 +39,7 @@ export class LinkExploderPluginSettingTab extends PluginSettingTab {
             'In the folder specified below'
           )
           .setValue(
-			  Location[this.plugin.settings.newFileLocation] ||
+            Location[this.plugin.settings.newFileLocation] ||
               Location[Location.VaultFolder]
           )
           .onChange(async (value) => {
