@@ -3,7 +3,7 @@ import { App, PluginSettingTab, Setting } from 'obsidian';
 
 export class LinkExploderPluginSettings {
   newFileLocation: Location = Location.VaultFolder;
-  customFileLocation: string = '';
+  customFileLocation = '';
 }
 
 export enum Location {

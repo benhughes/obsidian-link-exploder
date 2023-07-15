@@ -79,11 +79,11 @@ export default class LinkExploderPlugin extends Plugin {
     }
   }
 
-  async loadSettings() {
+  async loadSettings(): Promise<void> {
     this.settings = Object.assign({}, await this.loadData());
   }
 
-  async saveSettings() {
+  async saveSettings(): Promise<void> {
     await this.saveData(this.settings);
   }
 
