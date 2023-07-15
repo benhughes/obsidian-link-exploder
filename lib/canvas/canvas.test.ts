@@ -2,7 +2,6 @@ import { describe, expect, test } from '@jest/globals';
 import {
   canvas,
   createCanvasFromFile,
-  currentFile,
   edge,
   node,
   DEFAULT_BUFFER,
@@ -10,8 +9,8 @@ import {
 } from './canvas';
 
 describe('createCanvasFromFile', () => {
-  const doesFileExist = (_: string) => false;
-  const openFile = (_: currentFile) => ({});
+  const doesFileExist = () => false;
+  const openFile = () => ({});
 
   const testNodes = (nodes: Partial<node>[], resultNodes: node[]) => {
     expect(resultNodes.length).toBe(nodes.length);
@@ -320,7 +319,7 @@ describe('createCanvasFromFile', () => {
       testRunner = test.skip;
     }
     testRunner(tc.name, async () => {
-      const createFileMock = jest.fn((path: string, _: string) =>
+      const createFileMock = jest.fn((path: string) =>
         Promise.resolve({ path: path, basename: '' })
       );
 

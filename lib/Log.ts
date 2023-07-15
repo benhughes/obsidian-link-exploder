@@ -10,6 +10,7 @@ class Log {
 
   isDev: boolean;
 
+  // eslint-disable-next-line
   info(..._: any[]): void {
     // empty function in non dev envs
   }
