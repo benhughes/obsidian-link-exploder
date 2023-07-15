@@ -1,13 +1,14 @@
 {
   "name": "obsidian-link-exploder",
-  "version": "0.2.5",
+  "version": "0.3.0",
   "main": "main.js",
   "scripts": {
     "dev": "rollup --config rollup.config.js -w",
     "build": "rollup --config rollup.config.js --environment BUILD:production",
     "lint": "eslint . --ext .ts",
     "prettier": "prettier --write .",
-    "pre-commit": "npm run lint && npm run prettier"
+    "test": "npx jest",
+    "pre-commit": "npm run test && npm run lint && npm run prettier"
   },
   "keywords": [],
   "author": "",
