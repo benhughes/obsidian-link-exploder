@@ -319,7 +319,7 @@ describe('createCanvasFromFile', () => {
       testRunner = test.skip;
     }
     testRunner(tc.name, async () => {
-      const createFileMock = jest.fn((path: string) =>
+      const createFileMock = jest.fn((path: string, _: string) =>
         Promise.resolve({ path: path, basename: '' })
       );
 
