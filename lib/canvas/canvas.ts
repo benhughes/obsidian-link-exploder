@@ -224,7 +224,6 @@ export async function createCanvasFromFile(
   createFile: (path: string, data: string) => Promise<currentFile>,
   openFile: (currentFile: currentFile) => void,
   location: string
-  //settings: LinkExploderPluginSettings
 ): Promise<currentFile> {
   const { path: filePath, basename: fileName } = activeFile;
 
@@ -254,7 +253,6 @@ export async function createCanvasFromFile(
     doesFileExist
   );
 
-  //const path = getFileName(`${fileName}.canvas`, doesFileExist);
   if (!path) {
     throw `unable to save: ${fileName}`;
   }

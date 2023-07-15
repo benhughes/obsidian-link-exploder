@@ -25,6 +25,7 @@ export default class LinkExploderPlugin extends Plugin {
         if (checking) {
           return true;
         }
+
         const activeFile: TFile | null = this.app.workspace.getActiveFile();
         if (activeFile) {
           const doesFileExist = (path: string) =>
@@ -34,19 +35,21 @@ export default class LinkExploderPlugin extends Plugin {
           const openFile = (currentFile: TFile) =>
             this.app.workspace.getLeaf().openFile(currentFile);
           activeFile.parent;
-          const location = (() => {
-            switch (this.settings.newFileLocation) {
-              case Location.VaultFolder:
-              default:
-                return '';
-              case Location.SameFolder:
-                return activeFile.parent.path;
-              case Location.SpecifiedFolder:
-                return doesFileExist(this.settings.customFileLocation)
-                  ? this.settings.customFileLocation
-                  : '';
-            }
-          })();
+
+          let location = '';
+          switch (this.settings.newFileLocation) {
+            case Location.SameFolder:
+              location = activeFile.parent.path;
+              break;
+            case Location.SpecifiedFolder:
+              if (doesFileExist(this.settings.customFileLocation)) {
+                location = this.settings.customFileLocation;
+              }
+              new Notice(
+                `folder ${this.settings.customFileLocation} does not exist, creating in root folder`
+              );
+          }
+
           createCanvasFromFile(
             activeFile,
             this.app.metadataCache.resolvedLinks,
