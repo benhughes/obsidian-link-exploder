@@ -2,7 +2,7 @@
 
 # 🔗💣 Overview
 
-> 🎉 **0.3 Release:** Now with support for setting the destination of the created canvas (thanks @unex)
+> 🎉 **0.3 Release:** Now with support for setting the destination of the created canvas (thanks @UNEXENU)
 
 Link Exploder is a Obsidian plugin that creates a [canvas](https://obsidian.md/canvas) from a note, embedding it's incoming (i.e. backlinks) and outgoing links onto the canvas (as well as the their linked notes). The new canvas will be added to your root directory using the name of the note it's based off.
 
