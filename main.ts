@@ -1,11 +1,22 @@
 import { Notice, Plugin, TFile } from 'obsidian';
 import { createCanvasFromFile } from './lib/canvas/canvas';
 import { log } from './lib/Log';
+import {
+  Location,
+  LinkExploderPluginSettings,
+  LinkExploderPluginSettingTab,
+} from './settings';
 
 export default class LinkExploderPlugin extends Plugin {
+  settings: LinkExploderPluginSettings;
+
   async onload(): Promise<void> {
     log.setUp(this);
     log.info(`${this.manifest.name} Loaded`);
+
+    await this.loadSettings();
+
+    this.addSettingTab(new LinkExploderPluginSettingTab(this.app, this));
 
     this.addCommand({
       id: 'link-exploder-canvas-builder',
@@ -22,12 +33,27 @@ export default class LinkExploderPlugin extends Plugin {
             this.app.vault.create(path, data);
           const openFile = (currentFile: TFile) =>
             this.app.workspace.getLeaf().openFile(currentFile);
+          activeFile.parent;
+          const location = (() => {
+            switch (this.settings.newFileLocation) {
+              case Location.VaultFolder:
+              default:
+                return '';
+              case Location.SameFolder:
+                return activeFile.parent.path;
+              case Location.SpecifiedFolder:
+                return doesFileExist(this.settings.customFileLocation)
+                  ? this.settings.customFileLocation
+                  : '';
+            }
+          })();
           createCanvasFromFile(
             activeFile,
             this.app.metadataCache.resolvedLinks,
             doesFileExist,
             createFile,
-            openFile
+            openFile,
+            location
           ).catch((e) => {
             new Notice(`Something went wrong with creating the canvas: ${e}`);
             console.error(e);
@@ -51,6 +77,14 @@ export default class LinkExploderPlugin extends Plugin {
         hotkeys: [{ key: 'r', modifiers: ['Mod', 'Shift'] }],
       });
     }
+  }
+
+  async loadSettings() {
+    this.settings = Object.assign({}, await this.loadData());
+  }
+
+  async saveSettings() {
+    await this.saveData(this.settings);
   }
 
   onunload(): void {

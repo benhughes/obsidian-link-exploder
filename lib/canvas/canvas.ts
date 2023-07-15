@@ -222,7 +222,9 @@ export async function createCanvasFromFile(
   resolvedLinks: Record<string, Record<string, number>>,
   doesFileExist: (path: string) => boolean,
   createFile: (path: string, data: string) => Promise<currentFile>,
-  openFile: (currentFile: currentFile) => void
+  openFile: (currentFile: currentFile) => void,
+  location: string
+  //settings: LinkExploderPluginSettings
 ): Promise<currentFile> {
   const { path: filePath, basename: fileName } = activeFile;
 
@@ -247,8 +249,12 @@ export async function createCanvasFromFile(
   const canvas: canvas = { nodes, edges };
 
   log.info(canvas);
+  const path = getFileName(
+    location ? `${location}/${fileName}.canvas` : `${fileName}.canvas`,
+    doesFileExist
+  );
 
-  const path = getFileName(`${fileName}.canvas`, doesFileExist);
+  //const path = getFileName(`${fileName}.canvas`, doesFileExist);
   if (!path) {
     throw `unable to save: ${fileName}`;
   }
@@ -285,7 +291,7 @@ const buildResolvedIncomingLinks = (
 const getFileName = (
   path: string,
   doesFileExist: (path: string) => boolean
-) : string | null => {
+): string | null => {
   if (!doesFileExist(path)) {
     return path;
   }
