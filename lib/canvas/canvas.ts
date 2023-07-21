@@ -294,7 +294,9 @@ const getFileName = (
     return path;
   }
   const limit = 50;
-  const [name, extention] = path.split('.');
+  const idx = path.lastIndexOf('.');
+  const name = path.substring(0, idx);
+  const extention = path.substring(idx);
   for (let i = 0; i < limit; i++) {
     const newPath = `${name}-${i}.${extention}`;
     log.info(newPath);
