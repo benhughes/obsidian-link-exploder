@@ -44,10 +44,11 @@ export default class LinkExploderPlugin extends Plugin {
             case Location.SpecifiedFolder:
               if (doesFileExist(this.settings.customFileLocation)) {
                 location = this.settings.customFileLocation;
+              } else {
+                new Notice(
+                  `folder ${this.settings.customFileLocation} does not exist, creating in root folder`
+                );
               }
-              new Notice(
-                `folder ${this.settings.customFileLocation} does not exist, creating in root folder`
-              );
           }
 
           createCanvasFromFile(
