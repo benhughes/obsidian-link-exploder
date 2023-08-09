@@ -1,6 +1,7 @@
 import { describe, expect, test } from '@jest/globals';
 import {
   canvas,
+  getFileName,
   createCanvasFromFile,
   edge,
   node,
@@ -334,6 +335,53 @@ describe('createCanvasFromFile', () => {
       const createdCanvas: canvas = JSON.parse(createFileMock.mock.calls[0][1]);
       testNodes(tc.expectedNodes, createdCanvas.nodes);
       testEdges(tc.expectedEdges, createdCanvas.edges);
+    });
+  });
+});
+
+describe('getFileName', () => {
+  interface testCases {
+    name: string;
+    filePath: string;
+    pathsThatExist: string[];
+    expectedResult: string;
+    skip?: boolean;
+  }
+  const testCases: testCases[] = [
+    {
+      name: 'returns original value of it doesn\t exist',
+      filePath: 'bob.canvas',
+      pathsThatExist: [],
+      expectedResult: 'bob.canvas',
+    },
+    {
+      name: 'creates new name if exists',
+      filePath: 'bob.canvas',
+      pathsThatExist: ['bob.canvas'],
+      expectedResult: 'bob-0.canvas',
+    },
+    {
+      name: 'handles dot in path',
+      filePath: 'some.folder/bob.canvas',
+      pathsThatExist: ['some.folder/bob.canvas'],
+      expectedResult: 'some.folder/bob-0.canvas',
+      skip: true,
+    },
+  ];
+
+  testCases.forEach((tc) => {
+    let testRunner: typeof test | typeof test.skip = test;
+    if (tc.skip) {
+      testRunner = test.skip;
+    }
+    testRunner(tc.name, async () => {
+      const fakeDoesFileExist = (path: string): boolean => {
+        return tc.pathsThatExist.includes(path);
+      };
+
+      const result = getFileName(tc.filePath, fakeDoesFileExist);
+
+      expect(result).toBe(tc.expectedResult);
     });
   });
 });

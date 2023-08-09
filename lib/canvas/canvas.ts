@@ -286,7 +286,7 @@ const buildResolvedIncomingLinks = (
 // getFileName looks for a safe file name to use and returns it.
 // will take the path and add -n to the end until I finds one that doesn't
 // exist
-const getFileName = (
+export const getFileName = (
   path: string,
   doesFileExist: (path: string) => boolean
 ): string | null => {
