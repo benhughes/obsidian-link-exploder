@@ -365,7 +365,6 @@ describe('getFileName', () => {
       filePath: 'some.folder/bob.canvas',
       pathsThatExist: ['some.folder/bob.canvas'],
       expectedResult: 'some.folder/bob-0.canvas',
-      skip: true,
     },
   ];
 
