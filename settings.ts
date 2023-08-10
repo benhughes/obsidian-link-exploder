@@ -1,3 +1,4 @@
+import { FolderSuggest } from 'lib/suggest/FolderSuggester';
 import LinkExploderPlugin from './main';
 import { App, PluginSettingTab, Setting } from 'obsidian';
 
@@ -49,12 +50,13 @@ export class LinkExploderPluginSettingTab extends PluginSettingTab {
             this.display();
           });
       });
+
     if (this.plugin.settings.newFileLocation == Location.SpecifiedFolder) {
       new Setting(containerEl)
         .setName('Folder to create new canvas files in')
-        .addText((text) => {
-          text
-            .setPlaceholder('Example: folder 1/folder 2')
+        .addSearch((cb) => {
+          new FolderSuggest(cb.inputEl);
+          cb.setPlaceholder('Example: folder 1/folder 2')
             .setValue(this.plugin.settings.customFileLocation)
             .onChange(async (value) => {
               this.plugin.settings.customFileLocation = value;
